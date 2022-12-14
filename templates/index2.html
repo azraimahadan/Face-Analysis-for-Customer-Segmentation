@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Face Analyser with Deep Learning</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"/>
+    <link rel="stylesheet" href="C:\Users\AzraiMahadan\AI_ML_DL\Project\Capstone_FYP\static\css\style.css"
+    <script src="https://www.cssscript.com/demo/simple-typewriter-effect-pure-javascript-typewriterjs/typewriter.js"></script>
+  </head>
+
+  <body>
+    <!-- Heading Nav Menu (Responsive Design) -->
+
+      <!-- Main -->
+      <div class="section no-pad-bot" id="index-banner">
+        <div class="container">
+          <br><br>
+          <h1 class="center orange-text">Face Analysis with Deep Learning</h1>
+          <div class="center">
+            <h5 class="col light" style="margin-bottom: 5px;">Filter Mode
+            </h5>
+            <form action="/" method="get">
+              <button>Real Time Mode</button>
+            </form>
+      </div>
+      
+    </div> 
+      <div id="hello">
+      </div>
+      
+      
+
+        <!-- Live Camera Window -->
+        
+        <div class="center2">
+          <div class="child container1"><img src="{{ url_for('video_feed') }}" ></div>
+          <div class="child row">
+            <form action="/predict" method="get">
+            <span class="sub-row">
+            <label for="pass_race">Select a race:</label>
+            <select id="pass_race" name="pass_race">
+              <option value="5">None</option>
+                <option value="0">White</option>
+                <option value="1">Black</option>
+                <option value="2">Asian</option>
+                <option value="3">Indian</option>
+                <option value="4">Others</option>
+            </select>
+          </span>
+          <br>
+          <span>
+            <input type="checkbox" name="pass_gender" value=0>
+              <label for="pass_gender"> Male</label>
+            <input type="checkbox" name="pass_gender" value=1>
+              <label for="pass_gender"> Female</label><br>
+              <input type="checkbox" name="pass_gender" value=2>
+              <label for="pass_gender"> Not Specified</label><br>
+          </span>
+          <br>
+          <span>
+            <label for="age">Enter age range:</label>
+
+            <input type="number" id="pass_age1" name="pass_age1" maxlength="3" size="4" value="0" width="5"> -
+            <input type="number" id="pass_age2" name="pass_age2" maxlength="3" size="4" value="0">
+          </span>
+            <br>
+            <input type="submit" value="capture">
+            </form>
+        <div class="child textbox">
+          <p>{{predicted_age}}</p>
+          <p>{{predicted_gender}}</p>
+          <p>{{predicted_ethnicity}}</p>
+          <h4>{{predicted_text}}</h4><br>
+          <pre>{{predicted_text2}}</pre>
+        </div>
+        
+        </div>
+        </div>
+
+        <!-- End Button -->
+        <!--<div>
+          <form action="/predict" method="post">
+            <input type="submit" value="capture">
+        </form>-->
+          <!--<button type="button" class="btn"
+            onClick="{{ url_for('predict') }}">
+            &nbsp;Capture
+          </button>-->
+        </div>
+        <br>
+      <div>
+            <input type="button" value="End Program"
+              onClick="window.open('about:blank', '_self').close()">
+        </div>
+
+    </div>
+
+    <!-- Footer -->
+    <footer class="btm">
+      <p>&copy; Mohamad Azrai</p>
+    </footer>
+    <script type="text/javascript">
+      var app = document.getElementById('hello');
+
+      var typewriter = new Typewriter(hello, {
+          loop: true
+      });
+
+      typewriter.typeString('Hello! I am Azrai')
+          .pauseFor(2500)
+          .deleteAll()
+          .typeString('Nice to meet you')
+          .pauseFor(2500)
+          .deleteChars(16)
+          .typeString('Let\'s get started!')
+          .pauseFor(2500)
+          .start();
+
+    </script>
+  </body>
+
+</html>
