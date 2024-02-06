@@ -1,4 +1,6 @@
 import streamlit as st
+from streamlit_webrtc import WebRtcMode, webrtc_streamer
+import queue
 
 import cv2
 import numpy as np
@@ -9,15 +11,15 @@ from load import init
 from model import Face
 from tensorflow.keras.utils import img_to_array
 import os
+import av
 
 # Initialize the model
 loaded_model = init()
+result_queue: "queue.Queue[List[Detection]]" = queue.Queue()
 
+def video_frame_callback(frame: av.VideoFrame) -> av.VideoFrame:
+    img = frame.to_ndarray(format="bgr24")
 
-# Function to process the image and make predictions
-def predict(img):
-    # Preprocess the image as needed
-    # ...
     p_age = 0
     p_gender = ""
     p_race = ""
@@ -36,14 +38,12 @@ def predict(img):
                 "ethnicity": None,
                 "face_box": None
             }
-        return predictions
 
     else:
         max_w = max(result_list,key=lambda item:item[2]) #find max w/biggest face
         for (x,y,w,h) in result_list:   
             #add margin
             #margin_rate = 70
-
             try:
                 margin_x = int(w * 3 / 100)
                 margin_y = int(h * 10 / 100)+5
@@ -84,9 +84,14 @@ def predict(img):
             p_age = str(label_a)
 
             gender = label_g
-            
 
-            #print(pass_gender)
+            label = predictions['age']+"\n"+predictions['gender']+"\n"+predictions['ethnicity']
+            #label = f"Predicted Age: {predictions['age']}\nPredicted Gender: {predictions['gender']}\nPredicted Ethnicity: {predictions['ethnicity']}"
+
+            cv2.rectangle(img,(x-margin_x, y-margin_y),(x+w+margin_x, y+h+margin_y),(255, 51, 51),1)
+            cv2.putText(img, label, (int(x+w+25), int(y-12)), cv2.FONT_HERSHEY_COMPLEX, 0.5, (255, 51, 51), 1)
+
+
             #Verify race
             ind = np.argpartition(ee, -2)[-2:]
             p_race_second = races[ind[0]]
@@ -108,9 +113,10 @@ def predict(img):
             }
             
             break
+    result_queue.put(predictions)
 
-    # Return the predictions
-    return predictions
+    return av.VideoFrame.from_ndarray(img, format="bgr24")
+
 
 # Streamlit app
 def main():
@@ -124,45 +130,39 @@ def main():
     # Start and stop buttons
     start_button = st.button("Start")
     stop_button = st.button("Stop")
-    # OpenCV video capture
-    cap = cv2.VideoCapture(0)
 
-    while cap.isOpened() and start_button:
-        ret, frame = cap.read()
-        if not ret:
-            st.write("Video Capture Ended")
-            break
+    # Use the webrtc_streamer function to capture the video stream
+    webrtc_ctx = webrtc_streamer(
+        key="object-detection",
+        mode=WebRtcMode.SENDRECV,
+        rtc_configuration={
+            "iceServers": get_ice_servers(),
+            "iceTransportPolicy": "relay",
+        },
+    video_frame_callback=video_frame_callback,
+    media_stream_constraints={"video": True, "audio": False},
+    async_processing=True,
+)
+    # Process the frame and make predictions
+    predictions = predict(frame)
+    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-        # Process the frame and make predictions
-        predictions = predict(frame)
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-
-        if predictions["face_box"] is not None:
-            for (x,y,w,h) in predictions["face_box"]:
-                margin_x = int(w * 3 / 100)
-                margin_y = int(h * 10 / 100)+5
-
-                label = predictions['age']+"\n"+predictions['gender']+"\n"+predictions['ethnicity']
-                #label = f"Predicted Age: {predictions['age']}\nPredicted Gender: {predictions['gender']}\nPredicted Ethnicity: {predictions['ethnicity']}"
-
-                cv2.rectangle(frame,(x-margin_x, y-margin_y),(x+w+margin_x, y+h+margin_y),(255, 51, 51),1)
-                cv2.putText(frame, label, (int(x+w+25), int(y-12)), cv2.FONT_HERSHEY_COMPLEX, 0.5, (255, 51, 51), 1)
-
-        frame_placeholder.image(frame,channels="RGB")
-
-        # Update the predictions dynamically
-        age_placeholder.text("Predicted Age: {}".format(predictions["age"]))
-        gender_placeholder.text("Predicted Gender: {}".format(predictions["gender"]))
-        ethnicity_placeholder.text("Predicted Ethnicity: {}".format(predictions["ethnicity"]))
+    if st.checkbox("Show the detected labels", value=True):
+        if webrtc_ctx.state.playing:
+            labels_placeholder = st.empty()
+            # NOTE: The video transformation with object detection and
+            # this loop displaying the result labels are running
+            # in different threads asynchronously.
+            # Then the rendered video frames and the labels displayed here
+            # are not strictly synchronized.
+            while True:
+                result = result_queue.get()
+                # Update the predictions dynamically
+                age_placeholder.text("Predicted Age: {}".format(predictions["age"]))
+                gender_placeholder.text("Predicted Gender: {}".format(predictions["gender"]))
+                ethnicity_placeholder.text("Predicted Ethnicity: {}".format(predictions["ethnicity"]))
 
 
-        key = cv2.waitKey(1) & 0xFF
-        if key == ord('q') or stop_button:
-            start_button = False  # Break the loop if 'q' is pressed or stop button is clicked
-
-    # Release the video capture object
-    cap.release()
-    #cv2.destroyAllWindows()  # Close all OpenCV windows
 
 # Run the Streamlit app
 if __name__ == "__main__":
