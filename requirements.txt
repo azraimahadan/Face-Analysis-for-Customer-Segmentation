@@ -2,3 +2,4 @@ opencv-python-headless
 tensorflow
 numpy
 streamlit_webrtc
+twilio
