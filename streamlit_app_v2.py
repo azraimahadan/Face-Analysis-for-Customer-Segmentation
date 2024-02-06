@@ -143,10 +143,6 @@ def main():
     media_stream_constraints={"video": True, "audio": False},
     async_processing=True,
 )
-    # Process the frame and make predictions
-    predictions = predict(frame)
-    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-
     if st.checkbox("Show the detected labels", value=True):
         if webrtc_ctx.state.playing:
             labels_placeholder = st.empty()
@@ -156,7 +152,7 @@ def main():
             # Then the rendered video frames and the labels displayed here
             # are not strictly synchronized.
             while True:
-                result = result_queue.get()
+                predictions = result_queue.get()
                 # Update the predictions dynamically
                 age_placeholder.text("Predicted Age: {}".format(predictions["age"]))
                 gender_placeholder.text("Predicted Gender: {}".format(predictions["gender"]))
