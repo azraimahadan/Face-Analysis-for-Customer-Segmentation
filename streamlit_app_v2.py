@@ -128,11 +128,6 @@ def main():
     age_placeholder = st.empty()
     gender_placeholder = st.empty()
     ethnicity_placeholder = st.empty()
-
-    # Start and stop buttons
-    start_button = st.button("Start")
-    stop_button = st.button("Stop")
-
     # Use the webrtc_streamer function to capture the video stream
     webrtc_ctx = webrtc_streamer(
         key="object-detection",
