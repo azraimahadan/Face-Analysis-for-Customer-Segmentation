@@ -162,7 +162,7 @@ def main():
 
     # Release the video capture object
     cap.release()
-    cv2.destroyAllWindows()  # Close all OpenCV windows
+    #cv2.destroyAllWindows()  # Close all OpenCV windows
 
 # Run the Streamlit app
 if __name__ == "__main__":
