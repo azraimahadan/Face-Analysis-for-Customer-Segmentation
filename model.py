@@ -9,7 +9,6 @@ import numpy as np
 import pandas as pd
 from tensorflow.keras.utils import load_img, save_img, img_to_array
 from keras.models import Model, Sequential, model_from_json
-#from mtcnn.mtcnn import MTCNN
 from PIL import Image
 
 from load import *

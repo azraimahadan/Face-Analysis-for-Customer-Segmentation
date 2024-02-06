@@ -1,9 +1,9 @@
 import numpy as np
-import keras.models
+import streamlit as st
 from keras.models import model_from_json
 import tensorflow as tf
 
-
+@st.cache_resource
 def init(): 
     json_file = open('weights/model2.json', 'r')
     loaded_model_json = json_file.read()

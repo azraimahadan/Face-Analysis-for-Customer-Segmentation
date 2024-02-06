@@ -5,7 +5,6 @@ import cv2, os
 import numpy as np
 from tensorflow.keras.utils import load_img, save_img, img_to_array
 from keras.models import Model, Sequential, model_from_json
-from mtcnn.mtcnn import MTCNN
 from PIL import Image
 
 global model
@@ -14,7 +13,6 @@ pass_age1 = pass_age2 = -1
 
 loaded_model = init()
 
-mtcnn_detector = MTCNN()
 app = Flask(__name__)
 face_cascade = cv2.CascadeClassifier('haarcascade/haarcascade_frontalface_alt.xml')
 value = 0
