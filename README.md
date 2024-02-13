@@ -1,2 +1,2 @@
 # Face-Analysis-for-Customer-Segmentation
-Capstone Design Project 2022년 가을 학기
+Affiliation with Dept. of Computer Science And Engineering, Korea University
