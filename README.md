@@ -12,6 +12,8 @@ The project consists of the following components:
 - **OpenCV**: Handles video capture and face detection in real-time.
 - **Haar Cascades**: Utilizes pre-trained cascades for face detection.
 
+- Do create a specifc environment for this application 
+
 ## Installation
 
 1. **Clone the repository:**

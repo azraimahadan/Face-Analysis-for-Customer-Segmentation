@@ -6,20 +6,25 @@ from PIL import Image
 from load import init
 from model import Face
 from tensorflow.keras.utils import img_to_array
+from datetime import datetime
+import pandas as pd
 import os
 
 # Initialize the model
 loaded_model = init()
-
+frame_number = 0
 
 # Function to process the image and make predictions
 def predict(img):
+    global frame_number
     # Preprocess the image as needed
     # ...
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
     #face_cascade = cv2.CascadeClassifier('haarcascade/haarcascade_frontalface_alt.xml')    
     face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+
+    frame_number+=1
 
     result_list = face_cascade.detectMultiScale(img, 1.3, 5)
     if len(result_list) == 0:
@@ -83,7 +88,18 @@ def predict(img):
                 "ethnicity": f"{predicted_ethnicity}: {round(ethnicity_probabilities[predicted_ethnicity_index] * 100, 2)}%",
                 "face_box": result_list
             }
+            proba = np.round(100*ethnicity_probabilities[predicted_ethnicity_index], 2)
+            if proba >= 30:
+                if frame_number % 30 == 0 and proba >= 30:
+                    frame_number = 0
+                    df_prediction_file = pd.read_csv('prediction_data.csv', index_col=False)
 
+                    current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                    data = {'time':[current_time], 'predicted_age': [predicted_age],'predicted_gender': [round(gender_probability)],'predicted_ethnicity': [predicted_ethnicity_index]}
+                    df_new_prediction = pd.DataFrame(data)
+                    df_prediction_file = pd.concat([df_prediction_file, df_new_prediction], ignore_index=True)
+                    df_prediction_file.to_csv('prediction_data.csv', index=False)
+                    print("Analysis Updated\n")
             
             break
 
